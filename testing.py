@@ -5,6 +5,10 @@ Created on Thu Jun 29 09:09:53 2023
 @author: Dong Ha
 """
 
+from constants import *
+print(pi)
+
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import optimize as op
