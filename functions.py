@@ -5,67 +5,55 @@ Created on Tue Jun 20 08:30:39 2023
 @author: Dong Ha
 """
 
-import numpy as np
-from scipy.special import zeta, polygamma, factorial
+from constants import *
+from numba import jit
 
-#constants
-kb = 1.380649e-23
-h = 6.62607015e-34
-hbar = h/2/np.pi
-c = 2.99792458e8
-me = 9.1093837015e-31
-e = 1.602176634e-19
-eps0 = 8.8541878128e-12
-mp = 1.67262192369e-27
-B = 13.6*e
-G = 6.674e-11
-alp_fs = e*e/(2*eps0*h*c)
-st = 8*np.pi*(alp_fs*hbar/me/c)**2/3
-
-# convert z to T
-def T(z):
-    T = 2.725*(1+z)
-    return T
+#key functions
+#temperature for z
+@jit(nopython=True)
+def Temp(z):
+    return T0*(1+z)
 #photon number density
-def n_gamma(z):
-    ng = (kb*T(z)/h/c)**3*16*np.pi*zeta(3)
-    return ng
-
-#eta = baryon/photon
-
-def eta(Ob = 0.023):
-    n_bary = Ob*3e10/(3.0857e22**2*mp*8*np.pi*G)
-    e = n_bary/n_gamma(0)
-    return e
-
-#Saha equation
-def Saha(z, Ob):
-    S = 4*np.sqrt(2/np.pi)*zeta(3)*eta(Ob)*(kb*T(z)/me/c/c)**1.5*np.exp(B/kb/T(z))
-    return S
-
-#mass fraction
-
-def m_frac(z, Ob = 0.023):
-    X = (-1+np.sqrt(1+4*Saha(z, Ob)))/(2*Saha(z, Ob))
+@jit(nopython=True)
+def ng(z):
+    return (Temp(z)/hc)**3*16*pi*z3
+#Hubble parameter
+@jit(nopython=True)
+def Hubble(z):
+    H0 = 100*h/3.0857e19
+    return H0*np.sqrt(Orh2/h/h*(1+z)**4+Omh2/h/h*(1+z)**3+Ol)
+#Saha's ionisation fraction
+@jit(nopython=True)
+def saha(z):
+    S = 4*np.sqrt(2/pi)*z3*eta*(Temp(z)/(m*c*c))**1.5*np.exp(B/Temp(z))
+    X = (-1+np.sqrt(1+4*S))/(2*S)
     return X
+#Padmanabhan fitting
+@jit(nopython=True)
+def rev_ex(z):
+    amp = 2.4e-3*np.sqrt(Omh2)/0.02207
+    return amp*(z/1000)**12.75
+#%% recombination rates
+#trapezium approximation of recombination rates to excited states
+def a_ex(z):
+    x2 = B/(4*Temp(z))
+    expo = x2*np.exp(x2)*sc.exp1(x2)
+    return A*np.sqrt(x2)*(expo*(0.5+1/x2)+0.577+np.log(x2))
+#exponential fitting function
+@jit(nopython=True)
+def exp_fit(x, a, b):
+    """
+    a = rate coefficient at 1 eV
+    b = power to fit
+    """
+    return a*(ev/Temp(x))**b
 
-#Thompson scattering width
-
-def Thomp(z, X):
-    G = X*eta()*(kb*T(z)/h/c)**3*16*np.pi*zeta(3)*st*c
-    return G
-
-#hubble parameter
-def Hubble(z, H0, Or, Om, Ok, OL):
-    E_square = Or*(1+z)**4 + Om*(1+z)**3 + Ok*(1+z)**2 + OL
-    E = np.sqrt(E_square)
-    H = H0*E
-    return H
-
-#numerical Xe
-def X_num(z, Onr, Ob):
-    return 2.4e-3*np.sqrt(Onr)*(z/1000)**12.75/Ob
-
-#Numerical probability
-def prob(z):
-    return 5.26e-3*(z/1000)**13.25*np.exp(-0.37*(z/1000)**14.25)
+#%% functions for ionisation fraction function
+@jit(nopython=True)
+def K(z):
+    return (c*planck/ly)**3/(8*pi*Hubble(z))
+#beta/alpha
+@jit(nopython=True)
+def b_over_a(z):
+    T = Temp(z)
+    return (m*T/(2*pi*hbar**2))**1.5*np.exp(-B/(4*T))

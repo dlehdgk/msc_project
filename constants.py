@@ -28,6 +28,7 @@ m = 9.1095e-28
 c=3e10
 kb=1.3803e-16
 hbar=1.0546e-27
+planck = 6.6262e-27
 hc = 6.6262e-27*c
 #Binding energy of H 13.6 eV
 B = m*q**4/(2*hbar**2)
@@ -45,3 +46,7 @@ T0 = 2.7255*kb
 ev = 1.6022e-12
 #constant factor in review
 revA = 9.78*r0*r0*c
+#2S decay rate
+Lambda = 8.23
+#Lyman-alpha photon energy
+ly = 3*B/4
