@@ -25,5 +25,5 @@ data= camb.get_background(pars)
 z = np.linspace(1000, 1800, 300)
 back_ev = data.get_background_redshift_evolution(z, ['x_e', 'visibility'], format='array')
 
-plt.plot(z, back_ev[:,1])
+plt.plot(z, back_ev[:,0])
 plt.show()
