@@ -36,6 +36,7 @@ B = m*q**4/(2*hbar**2)
 a0 = hbar**2/(m*q*q)
 #ground state photoionisation x-section
 sig0 = 512*(pi*q*a0)**2/(3*e4*hbar*c)
+#x-section from TA vol1
 #sig0 = 64*q*q*pi*a0**2/(3*np.sqrt(3)*hbar*c)
 #recombination coefficient multiplicative constant term
 A = sig0*c/np.sqrt(pi)*(q*q/(hbar*c))**3
